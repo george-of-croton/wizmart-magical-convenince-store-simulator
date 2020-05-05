@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>My first three.js app</title>
+  <div id="toolbar">
+    editor mode
+    <input id="ed" type="checkbox"></input>
+    <button id="ps">print state</button>
+    <select id="tile" type="select" value="path">
+      <option>path</option>
+      <option>tree</option>
+    </select>
+  </div>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+    }
+
+    #toolbar {
+      color: white;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 300px;
+    }
+
+    canvas {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <script src="js/three.js"></script> -->
+  <script>
+
+    function setAttributes(element, attributes) {
+      for (const [attr, val] of attributes) {
+        element.setAttribute(attr, val)
+      }
+      return element
+    }
+    let developermode
+
+
+    function main() {
+
+      const setup = () => {
+        const canvas = document.createElement("canvas")
+        var height = 300
+        var width = 300
+        setAttributes(canvas, [["id", "canvas"], ["height", 400], ["width", 400], ["background-color", "black"]])
+        document.body.appendChild(canvas)
+        return canvas
+      }
+
+      const canvas = setup()
+      const ctx = canvas.getContext("2d")
+      // ctx.scale(2, 2)
+
+      let wizardSpriteMain = new Image(25, 25)
+      wizardSpriteMain.src = "wiz-main.png"
+      let wizardSpriteRight = new Image(25, 25)
+      wizardSpriteRight.src = "wiz-right.png"
+      let dog = new Image(25, 25)
+      dog.src = "dog.png"
+      let store = new Image(25, 25)
+      store.src = "store.png"
+      let path = new Image(25, 25)
+      path.src = "path.png"
+      let tree = new Image(25, 25)
+      tree.src = "tree.png"
+      let house = new Image(125, 125)
+      house.src = "house.png"
+      const tileMap = {
+        tree: tree,
+        path: path
+      }
+      const state = []
+      // const state = [[{}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }], [{}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }], [{}, {}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, {}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }]]
+
+      let wizx = 5
+      let wizy = 5
+      let wizdir
+      let wizFrames
+      let scrolling = false
+      wizmoving = 0
+      for (let x = 0; x < 26; x++) {
+        for (let y = 0; y < 26; y++) {
+          if (!state[y]) {
+            state[y] = []
+          }
+
+          state[y][x] = { tile: "path" }
+        }
+      }
+
+
+      ///setup canvas
+
+
+      let xos = 0
+      let yos = 0
+      function render(ctx, state) {
+        console.log({
+          wizx,
+          wizy,
+          xos,
+          yos
+        })
+        const offsetX = wizx - xos
+        const offsetY = wizy - yos
+        const renderSize = developermode ? 24 + 2 : 16 + 2
+        if (developermode) {
+          console.log("here")
+          xos = 0
+          yos = 0
+        }
+        const wizardSprite = wizdir === "right" ? wizardSpriteRight : wizardSpriteMain
+        ctx.clearRect(0, 0, 300, 300)
+        for (let x = 0; x < renderSize; x++) {
+          for (let y = 0; y < renderSize; y++) {
+            ctx.fillStyle = ((x + xos) + (y + yos)) % 2 === 0 ? "grey" : "white"
+            if (state[x + xos][y + yos].tile) {
+              if (scrolling) {
+                ctx.drawImage(tileMap[state[x + xos][y + yos].tile], (x * 25) - ((25 / wizFrames) * wizmoving), y * 25)
+              } else {
+                ctx.fillRect(x * 25, y * 25, 25, 25);
+                ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * 25, y * 25)
+              }
+            } else {
+              ctx.fillRect(x * 25, y * 25, 25, 25);
+            }
+
+          }
+        }
+
+
+        if (scrolling) {
+          // ctx.drawImage(tileMap[state[x + xos][y + yos].tile], (x - 1) * 25 + ((25 / wizFrames) * wizmoving), y * 25)
+
+          // ctx.drawImage(house, 0 - (25 * xos) + ((25 / wizFrames) * wizmoving), 0 - (25 * yos))
+          // ctx.drawImage(dog, (25 * 7) - (25 * xos) + + ((25 / wizFrames) * wizmoving), (25 * 8) - (25 * yos))
+
+
+          ctx.drawImage(store, ((25 * 7) - (25 * (xos - 1))) - ((25 / wizFrames) * wizmoving), (25 * 8) - (25 * yos))
+        } else {
+
+
+
+          // ctx.drawImage(house, 0 - (25 * xos), 0 - (25 * yos))
+          // ctx.drawImage(dog, (25 * 7) - (25 * xos), (25 * 8) - (25 * yos))
+
+
+          ctx.drawImage(store, (25 * 7) - (25 * xos), (25 * 8) - (25 * yos))
+        }
+
+        if (wizmoving) {
+          if (wizdir === "left") {
+            ctx.drawImage(wizardSprite, ((wizx + 1) - xos) * 25 - ((25 / wizFrames) * wizmoving), (wizy - yos) * 25)
+          }
+          if (wizdir === "right") {
+            if (scrolling) {
+              ctx.drawImage(wizardSprite, (wizx - xos) * 25, (wizy - yos) * 25)
+            } else {
+              ctx.drawImage(wizardSprite, ((wizx - 1) - xos) * 25 + ((25 / wizFrames) * wizmoving), (wizy - yos) * 25)
+            }
+
+          }
+          if (wizdir === "down") {
+            ctx.drawImage(wizardSprite, (wizx - xos) * 25, ((wizy - 1) - yos) * 25 + ((25 / wizFrames) * wizmoving))
+          }
+          if (wizdir === "up") {
+            ctx.drawImage(wizardSprite, (wizx - xos) * 25, ((wizy + 1) - yos) * 25 - ((25 / wizFrames) * wizmoving))
+          }
+          if (wizmoving === wizFrames) {
+            wizmoving = 0
+            wizFrames = 0
+            scrolling = false
+          } else {
+            wizmoving += 1
+          }
+        } else {
+          ctx.drawImage(wizardSprite, (wizx - xos) * 25, (wizy - yos) * 25)
+        }
+
+      }
+
+      const psButton = document.getElementById("ps")
+      const emButton = document.getElementById("ed")
+
+      ps.addEventListener("click", () => {
+        console.log(JSON.stringify(state))
+      })
+
+      emButton.addEventListener("change", () => {
+        console.log(emButton.value)
+        if (developermode) {
+          canvas.setAttribute("height", "300")
+          canvas.setAttribute("width", "300")
+          return developermode = false
+        }
+        console.log("sdsada")
+        canvas.setAttribute("height", "600")
+        canvas.setAttribute("width", "600")
+        return developermode = true
+      })
+
+
+
+
+      document.addEventListener('keydown', (e) => {
+
+        if (e.key === "ArrowRight" && wizx + xos <= 24) {
+          if (wizdir === "left") {
+            wizdir = "right"
+            return
+          }
+          wizdir = "right"
+          if (wizx > 5 && (wizx + xos) < 16) {
+            xos += 1
+            scrolling = true
+          }
+          wizmoving = 1
+          wizFrames = 5
+          wizdir
+          return wizx += 1
+        }
+        if (e.key === "ArrowLeft" && wizx > 0) {
+          if (wizdir === "right") {
+            wizdir = "left"
+            return
+          }
+          xos > 0 && wizx + xos < 20 ? xos -= 1 : null
+          wizdir = "left"
+          wizmoving = 1
+          wizFrames = 5
+          wizdir
+          return wizx -= 1
+        }
+
+        if (e.key === "ArrowDown" && wizy + yos <= 24) {
+          wizdir = "down"
+          if (wizy > 5 && wizy + yos < 20) {
+            yos += 1
+          }
+          // wizy > 5 && wizy + yos < 20 ?  : null
+          wizmoving = 1
+          wizFrames = 5
+          wizdir
+          return wizy += 1
+        }
+
+        if (e.key === "ArrowUp" && wizy > 0) {
+          yos > 0 && wizy + yos < 20 ? yos -= 1 : null
+          wizdir = "up"
+          wizmoving = 1
+          wizFrames = 5
+          wizdir
+          return wizy -= 1
+        }
+      })
+
+      canvas.addEventListener("mousedown", e => {
+        const x = e.offsetX / 25 + xos
+        const y = e.offsetY / 25 + yos
+        const prev = state[Math.round(x - 0.5)][Math.round(y - 0.5)]
+        const tile = document.getElementById("tile").value
+        state[Math.round(x - 0.5)][Math.round(y - 0.5)] = { tile }
+      })
+
+      setInterval(() => render(ctx, state), 41.6)
+
+    }
+
+    main()
+
+			// Our Javascript will go here.
+  </script>
+</body>
+
+</html>
