@@ -12,6 +12,10 @@
       <option>path</option>
       <option>tree</option>
     </select>
+    x:
+    <span id="x"></span>
+    y:
+    <span id="y"></span>
   </div>
   <style>
     body {
@@ -54,130 +58,378 @@
         const canvas = document.createElement("canvas")
         var height = 300
         var width = 300
-        setAttributes(canvas, [["id", "canvas"], ["height", 400], ["width", 400], ["background-color", "black"]])
+        setAttributes(canvas, [["id", "canvas"], ["height", 800], ["width", 1024], ["background-color", "black"]])
         document.body.appendChild(canvas)
         return canvas
       }
 
       const canvas = setup()
       const ctx = canvas.getContext("2d")
-      // ctx.scale(2, 2)
+      const tileSize = 64
 
-      let wizardSpriteMain = new Image(25, 25)
-      wizardSpriteMain.src = "wiz-main.png"
-      let wizardSpriteRight = new Image(25, 25)
-      wizardSpriteRight.src = "wiz-right.png"
-      let dog = new Image(25, 25)
-      dog.src = "dog.png"
-      let store = new Image(25, 25)
-      store.src = "store.png"
-      let path = new Image(25, 25)
-      path.src = "path.png"
-      let tree = new Image(25, 25)
-      tree.src = "tree.png"
-      let house = new Image(125, 125)
-      house.src = "house.png"
+      // ctx.scale(2, 2)
+      let wizardLeft = new Image(tileSize, tileSize)
+      wizardLeft.src = "assets/pix-wiz-left.png"
+      let wizardRight = new Image(tileSize, tileSize)
+      wizardRight.src = "assets/pix-wiz-right.png"
+      const counter = new Image()
+      counter.src = "assets/counter.png"
+      const wall = new Image()
+      wall.src = "assets/wall.png"
+      let man = new Image()
+      man.src = "assets/man.png"
+      let diamond = new Image()
+      diamond.src = "assets/diamond.png"
+
+      const spriteMap = {
+        "down": [wizardLeft, wizardLeft],
+        "up": [wizardRight, wizardRight],
+        "left": [wizardLeft, wizardLeft],
+        "right": [wizardRight, wizardRight]
+      }
+      let dog = new Image(tileSize, tileSize)
+      dog.src = "assets/dog.png"
+
+      let pyramid = new Image(256, 256)
+      pyramid.src = "assets/pyramid.png"
+      let store = new Image(100, 100)
+      store.src = "assets/store.png"
+
+      let wizmart = new Image(100, 100)
+      wizmart.src = "assets/wizmart.png"
+      let path = new Image(tileSize, tileSize)
+      path.src = "assets/grass.png"
+      let tile = new Image(tileSize, tileSize)
+      tile.src = "assets/tile.png"
+      let mat = new Image(tileSize, tileSize)
+      mat.src = "assets/mat.png"
+      let tree = new Image(tileSize, tileSize)
+      tree.src = "assets/tree.png"
+      // let house = new Image(1tileSize, 1tileSize)
+      // house.src = "house.png"
       const tileMap = {
         tree: tree,
-        path: path
+        path: path,
+        tile,
+        mat,
+        wizmart
       }
-      const state = []
-      // const state = [[{}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }], [{}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }], [{}, {}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, {}, {}, {}, {}, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }], [{ "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "tree" }, { "tile": "tree" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }, { "tile": "path" }]]
 
-      let wizx = 5
-      let wizy = 5
-      let wizdir
-      let wizFrames
-      let scrolling = false
-      wizmoving = 0
-      for (let x = 0; x < 26; x++) {
-        for (let y = 0; y < 26; y++) {
-          if (!state[y]) {
-            state[y] = []
+      const debounce = (func, wait, immediate) => {
+        let timeout
+        return (args) => {
+          const later = () => timeout = null
+          func(args)
+        }
+        const callNow = !timeout
+        timeout = setTimeout(later, wait)
+        if (callNow) func(args)
+      }
+
+      const mainMapAssets = [{
+        asset: store,
+        dimensions: { x: 256, y: 256 },
+        position: { x: 4, y: 4 },
+      }, {
+        asset: pyramid,
+        dimensions: { x: 256, y: 256 },
+        position: { x: 5, y: -1 },
+
+      }, {
+        asset: wizmart,
+        dimensions: { x: 256, y: 512 },
+        position: { x: 10, y: 10 },
+      }, {
+        asset: diamond,
+        dimensions: { x: 128, y: 128 },
+        position: { x: 6, y: 12 },
+        scale: 2
+      }]
+
+      const mainMapActionTiles = {
+        67: () => {
+          if (map === "storeMap") return
+          if (wizdir === "up") {
+            map = "storeMap"
+            wizx = 4
+            wizy = 5
+            wizdir = "right"
+            wizFrames = 4;
+            wizmoving = 1
+            yos = 0
+            xos = 0
+            scrolling = false
           }
-
-          state[y][x] = { tile: "path" }
+        },
+        68: () => {
+          if (map === "storeMap") return
+          if (wizdir !== "down") {
+            map = "storeMap"
+            wizx = 8
+            wizy = 9
+            wizdir = "up"
+            wizFrames = 4;
+            wizmoving = 1
+            yos = 0
+            xos = 0
+            scrolling = false
+          }
         }
       }
+      const screenTileHeight = 12
+      const screenTileWidth = 16
 
+      const createWalls = (assets) => assets.reduce((acc, asset) => {
+        const tilesx = asset.dimensions.x / tileSize
+        const tilesY = asset.dimensions.y / tileSize
+        const tiles = {
 
-      ///setup canvas
-
-
-      let xos = 0
-      let yos = 0
-      function render(ctx, state) {
-        console.log({
-          wizx,
-          wizy,
-          xos,
-          yos
-        })
-        const offsetX = wizx - xos
-        const offsetY = wizy - yos
-        const renderSize = developermode ? 24 + 2 : 16 + 2
-        if (developermode) {
-          console.log("here")
-          xos = 0
-          yos = 0
         }
-        const wizardSprite = wizdir === "right" ? wizardSpriteRight : wizardSpriteMain
-        ctx.clearRect(0, 0, 300, 300)
-        for (let x = 0; x < renderSize; x++) {
-          for (let y = 0; y < renderSize; y++) {
-            ctx.fillStyle = ((x + xos) + (y + yos)) % 2 === 0 ? "grey" : "white"
-            if (state[x + xos][y + yos].tile) {
-              if (scrolling) {
-                ctx.drawImage(tileMap[state[x + xos][y + yos].tile], (x * 25) - ((25 / wizFrames) * wizmoving), y * 25)
-              } else {
-                ctx.fillRect(x * 25, y * 25, 25, 25);
-                ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * 25, y * 25)
+        for (let x = 0; x < tilesx; x++) {
+          for (let y = 0; y < tilesY; y++) {
+            tiles[String(asset.position.x + x) + "-" + String(asset.position.y + y)] = true
+          }
+        }
+        return {
+          ...tiles,
+          ...acc
+        }
+      }, {})
+
+      const createMap = (height, width, large, worldSize = 50, actionTiles, assets = [], walls = [], defaultTile = 'tile') => {
+        const map = []
+        const xOffset = width < screenTileWidth ? (screenTileWidth - width) / 2 : 0
+        const yOffset = height < screenTileWidth ? (screenTileHeight - height) / 2 : 0
+        console.log({ xOffset, yOffset })
+        for (let x = 0; x < worldSize; x++)
+          for (let y = 0; y < worldSize; y++) {
+            if (!map[x]) {
+              map[x] = []
+            }
+            map[x][y] = {};
+            if (xOffset) {
+              if (x > xOffset && x < (screenTileWidth - xOffset) && y > yOffset && y < (screenTileHeight - yOffset)) {
+                console.log("tile")
+                map[x][y].tile = defaultTile
               }
             } else {
-              ctx.fillRect(x * 25, y * 25, 25, 25);
+              map[x][y].tile = defaultTile
             }
+            if (actionTiles[[x, y].join("")]) {
+              map[x][y].action = actionTiles[[x, y].join("")]
+              map[x][y].tile = "mat"
+            }
+          }
+
+        const mapWalls = createWalls([...assets, ...walls])
+        const hasWall = (x, y, direction) => {
+          const dirMap = {
+            up: String(x) + '-' + String(y - 1),
+            down: String(x) + '-' + String(y + 1),
+            left: String(x - 1) + '-' + String(y),
+            right: String(x + 1) + '-' + String(y),
+          }
+          return Boolean(mapWalls[dirMap[direction]])
+        }
+        return { map, mapSize: worldSize, assets, actionTiles, mapWalls: createWalls([...assets, ...walls]), hasWall, }
+      }
+
+      const storeActionTiles = {
+        89: () => {
+          console.log("here")
+          if (map === "mainMap") return
+          if (wizdir === "down") {
+            map = "mainMap"
+            wizx = 5
+            wizy = 7
+            wizdir = "down"
+            wizFrames = 4;
+            wizmoving = 1
+            yos = 3
+            xos = 0
+            scrolling = false
+          }
+        }
+      }
+
+      const storeWalls = [
+        {
+          dimensions: { x: 64, y: 64 * 5 },
+          position: { x: 5, y: 4 }
+        },
+        {
+          dimensions: { x: 64 * 5, y: 64 },
+          position: { x: 6, y: 3 }
+        },
+        {
+          dimensions: { x: 64, y: 64 * 5 },
+          position: { x: 11, y: 4 }
+        },
+        {
+          dimensions: { x: 64 * 6, y: 64 },
+          position: { x: 5, y: 10 }
+        }
+      ]
+
+      const storeMap = createMap(7, 5, false, 28, storeActionTiles, [    {
+          dimensions: { x: 64 * 4, y: 64 },
+          position: { x: 6, y: 5 },
+          asset: counter
+        }, {
+          dimensions: { x: 64 * 5, y: 64 * 2 },
+          position: { x: 6, y: 2 },
+          asset: wall
+        }], storeWalls)
+
+      const mainMap = createMap(Infinity, Infinity, true, 500, mainMapActionTiles, mainMapAssets,[], "path")
+
+      let map = "mainMap";
+      let wizx = 3;
+      let wizy = 3;
+      let wizdir = "down";
+      let wizFrames;
+      let wizJumpFrames;
+      let wizjumping;
+      let scrolling = false;
+      let xos = 0;
+      let yos = 0;
+      let ymod = 0;
+      let wizmoving = 0;
+      let sceneTransition = 0;
+
+      const maps = {
+        mainMap,
+        storeMap
+      }
+      const renderSize = developermode ? 20 : screenTileWidth
+
+
+      function render(ctx, state) {
+        document.getElementById("x").innerText = wizx;
+        document.getElementById("y").innerText = wizy
+
+        const mapsize = maps[map].mapSize
+        if (mapsize <= 28) scrolling = false
+
+        const offsetX = wizx - xos
+        const offsetY = wizy - yos
+        if (developermode) {
+          xos = 0
+          yos = 0
+          scrolling = false
+
+        }
+        const jump = [3, 5, 10, 3, 0, 0]
+        const wizardSprite = spriteMap[wizdir][wizmoving % 2]
+        ctx.clearRect(0, 0, 800, 1200)
+        if (sceneTransition) {
+          sceneTransition -= 1
+          return
+        }
+        for (let x = 0; x < renderSize + 1; x++) {
+          for (let y = 0; y < renderSize; y++) {
+            try {
+              if (state[x + xos][y + yos].tile) {
+                if (scrolling) {
+                  if (wizdir === "right") {
+                    ctx.drawImage(tileMap[state[x + xos - 1][y + yos].tile], ((x) * tileSize) - ((tileSize / wizFrames) * wizmoving), y * tileSize, tileSize, tileSize)
+
+                  }
+
+                  if (wizdir === "left") {
+                    ctx.drawImage(tileMap[state[x + xos][y + yos].tile], ((x - 1) * tileSize) + ((tileSize / wizFrames) * wizmoving), y * tileSize, tileSize, tileSize)
+
+                  }
+
+                  if (wizdir === "down") {
+                    ctx.drawImage(tileMap[state[x + xos][y + yos - 1].tile], x * tileSize, ((y) * tileSize) - ((tileSize / wizFrames) * wizmoving), tileSize, tileSize)
+
+                  }
+                  if (wizdir === "up") {
+                    ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * tileSize, ((y - 1) * tileSize) + ((tileSize / wizFrames) * wizmoving), tileSize, tileSize)
+                  }
+                } else {
+                  ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                  ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * tileSize, y * tileSize, tileSize, tileSize)
+                }
+              } else {
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+              }
+            } catch (e) {
+              console.log("error", { x, y, scrolling, xos, yos, wizx, wizy })
+              throw e
+            }
+
 
           }
         }
 
+        for ({ asset, position, dimensions } of maps[map].assets) {
+          if (scrolling) {
+            if (wizdir === "right") {
+              ctx.drawImage(asset, ((tileSize * position.x) - (tileSize * (xos - 1))) - ((tileSize / wizFrames) * wizmoving), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
+            }
 
-        if (scrolling) {
-          // ctx.drawImage(tileMap[state[x + xos][y + yos].tile], (x - 1) * 25 + ((25 / wizFrames) * wizmoving), y * 25)
+            if (wizdir === "left") {
+              ctx.drawImage(asset, ((tileSize * position.x) - (tileSize * (xos + 1))) + ((tileSize / wizFrames) * wizmoving), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
+            }
 
-          // ctx.drawImage(house, 0 - (25 * xos) + ((25 / wizFrames) * wizmoving), 0 - (25 * yos))
-          // ctx.drawImage(dog, (25 * 7) - (25 * xos) + + ((25 / wizFrames) * wizmoving), (25 * 8) - (25 * yos))
+            if (wizdir === "down") {
+              ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * (yos - 1)) - ((tileSize / wizFrames) * wizmoving), dimensions.x, dimensions.y)
+            }
 
+            if (wizdir === "up") {
+              ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * (yos + 1)) + ((tileSize / wizFrames) * wizmoving), dimensions.x, dimensions.y)
+            }
 
-          ctx.drawImage(store, ((25 * 7) - (25 * (xos - 1))) - ((25 / wizFrames) * wizmoving), (25 * 8) - (25 * yos))
-        } else {
-
-
-
-          // ctx.drawImage(house, 0 - (25 * xos), 0 - (25 * yos))
-          // ctx.drawImage(dog, (25 * 7) - (25 * xos), (25 * 8) - (25 * yos))
-
-
-          ctx.drawImage(store, (25 * 7) - (25 * xos), (25 * 8) - (25 * yos))
+          } else {
+            ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
+          }
         }
 
+
+        if (wizjumping) {
+          const step = jump[wizjumping - 1]
+          ymod = step * 2
+          wizjumping += 1
+        }
+
+
+        if (state[wizx][wizy].action) {
+          state[wizx][wizy].action()
+        }
         if (wizmoving) {
           if (wizdir === "left") {
-            ctx.drawImage(wizardSprite, ((wizx + 1) - xos) * 25 - ((25 / wizFrames) * wizmoving), (wizy - yos) * 25)
+            if (scrolling) {
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
+            } else {
+              ctx.drawImage(wizardSprite, ((wizx + 1) - xos) * tileSize - ((tileSize / wizFrames) * wizmoving), (wizy - yos) * tileSize)
+            }
           }
           if (wizdir === "right") {
             if (scrolling) {
-              ctx.drawImage(wizardSprite, (wizx - xos) * 25, (wizy - yos) * 25)
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
             } else {
-              ctx.drawImage(wizardSprite, ((wizx - 1) - xos) * 25 + ((25 / wizFrames) * wizmoving), (wizy - yos) * 25)
+              ctx.drawImage(wizardSprite, ((wizx - 1) - xos) * tileSize + ((tileSize / wizFrames) * wizmoving), (wizy - yos) * tileSize, 46, 64)
             }
 
           }
           if (wizdir === "down") {
-            ctx.drawImage(wizardSprite, (wizx - xos) * 25, ((wizy - 1) - yos) * 25 + ((25 / wizFrames) * wizmoving))
+            if (scrolling) {
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
+            } else {
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy - 1) - yos) * tileSize + ((tileSize / wizFrames) * wizmoving), 64, 64)
+            }
           }
           if (wizdir === "up") {
-            ctx.drawImage(wizardSprite, (wizx - xos) * 25, ((wizy + 1) - yos) * 25 - ((25 / wizFrames) * wizmoving))
+            if (scrolling) {
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
+
+            } else {
+              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy + 1) - yos) * tileSize - ((tileSize / wizFrames) * wizmoving), 64, 64)
+            }
           }
+
           if (wizmoving === wizFrames) {
             wizmoving = 0
             wizFrames = 0
@@ -186,8 +438,13 @@
             wizmoving += 1
           }
         } else {
-          ctx.drawImage(wizardSprite, (wizx - xos) * 25, (wizy - yos) * 25)
+          if (wizjumping === wizJumpFrames) {
+            wizJumpFrames = 0
+            wizjumping = 0
+          }
+          ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy - yos) * tileSize) - ymod, 64, 64)
         }
+
 
       }
 
@@ -205,7 +462,6 @@
           canvas.setAttribute("width", "300")
           return developermode = false
         }
-        console.log("sdsada")
         canvas.setAttribute("height", "600")
         canvas.setAttribute("width", "600")
         return developermode = true
@@ -215,19 +471,29 @@
 
 
       document.addEventListener('keydown', (e) => {
+        const currentMap = maps[map]
 
-        if (e.key === "ArrowRight" && wizx + xos <= 24) {
+        if (wizmoving) return
+        const mapsize = maps[map].mapSize
+        const bigMap = mapsize > 29
+
+
+        if (e.key === "ArrowRight" && wizx < mapsize - 4) {
           if (wizdir === "left") {
             wizdir = "right"
             return
           }
           wizdir = "right"
-          if (wizx > 5 && (wizx + xos) < 16) {
+          if (currentMap.hasWall(wizx, wizy, "right")) {
+            return
+          }
+          console.log()
+          if (bigMap && wizx - xos > 5 && wizx + (renderSize + 1) < mapsize) {
             xos += 1
             scrolling = true
           }
           wizmoving = 1
-          wizFrames = 5
+          wizFrames = 4;
           wizdir
           return wizx += 1
         }
@@ -236,51 +502,65 @@
             wizdir = "left"
             return
           }
-          xos > 0 && wizx + xos < 20 ? xos -= 1 : null
+          if (currentMap.hasWall(wizx, wizy, "left")) return
+          if (bigMap && xos > 0 && (wizx - xos) < 4) {
+            xos -= 1
+            scrolling = true
+          }
           wizdir = "left"
           wizmoving = 1
-          wizFrames = 5
+          wizFrames = 4;
           wizdir
           return wizx -= 1
         }
 
-        if (e.key === "ArrowDown" && wizy + yos <= 24) {
+        if (e.key === "ArrowDown" && wizy < mapsize - 2) {
+
           wizdir = "down"
-          if (wizy > 5 && wizy + yos < 20) {
+          if (currentMap.hasWall(wizx, wizy, "down")) return
+
+          if (bigMap && (wizy - yos) > screenTileHeight / 2 && (yos + wizy) - (screenTileHeight * 2)  < mapsize - 2) {
             yos += 1
+            scrolling = true
           }
-          // wizy > 5 && wizy + yos < 20 ?  : null
           wizmoving = 1
-          wizFrames = 5
+          wizFrames = 4;
           wizdir
           return wizy += 1
         }
 
         if (e.key === "ArrowUp" && wizy > 0) {
-          yos > 0 && wizy + yos < 20 ? yos -= 1 : null
+
           wizdir = "up"
+          if (currentMap.hasWall(wizx, wizy, "up")) return
+          if (bigMap && yos > 0 && (wizy - yos) < 3) {
+            yos -= 1
+            scrolling = true
+          }
           wizmoving = 1
-          wizFrames = 5
-          wizdir
+          wizFrames = 4;
           return wizy -= 1
+        }
+
+        if (e.key === " " && wizy > 0) {
+          wizjumping = 1
+          wizJumpFrames = 5
         }
       })
 
       canvas.addEventListener("mousedown", e => {
-        const x = e.offsetX / 25 + xos
-        const y = e.offsetY / 25 + yos
-        const prev = state[Math.round(x - 0.5)][Math.round(y - 0.5)]
-        const tile = document.getElementById("tile").value
-        state[Math.round(x - 0.5)][Math.round(y - 0.5)] = { tile }
-      })
+        const x = e.offsetX / tileSize + xos
+        const y = e.offsetY / tileSize + yos
 
-      setInterval(() => render(ctx, state), 41.6)
+        const prev = maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)]
+        const tile = document.getElementById("tile").value
+        maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)] = { tile }
+      })
+      setInterval(() => render(ctx, maps[map].map), 42)
 
     }
 
     main()
-
-			// Our Javascript will go here.
   </script>
 </body>
 

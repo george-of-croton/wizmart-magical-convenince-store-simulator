@@ -1,0 +1,14 @@
+{
+  "name": "mystical-convenience-store-simlator-2020",
+  "version": "1.0.0",
+  "description": "sim game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
