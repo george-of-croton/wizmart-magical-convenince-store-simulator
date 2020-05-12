@@ -99,6 +99,8 @@
       wizmart.src = "assets/wizmart.png"
       let path = new Image(tileSize, tileSize)
       path.src = "assets/grass.png"
+      let planks = new Image(tileSize, tileSize)
+      planks.src = "assets/planks.png"
       let tile = new Image(tileSize, tileSize)
       tile.src = "assets/tile.png"
       let mat = new Image(tileSize, tileSize)
@@ -112,7 +114,8 @@
         path: path,
         tile,
         mat,
-        wizmart
+        wizmart,
+        planks
       }
 
       const debounce = (func, wait, immediate) => {
@@ -129,16 +132,16 @@
       const mainMapAssets = [{
         asset: store,
         dimensions: { x: 256, y: 256 },
-        position: { x: 4, y: 4 },
+        position: { x: 0, y: 0 },
       }, {
         asset: pyramid,
         dimensions: { x: 256, y: 256 },
-        position: { x: 5, y: -1 },
+        position: { x: 5, y: 0 },
 
       }, {
         asset: wizmart,
         dimensions: { x: 256, y: 512 },
-        position: { x: 10, y: 10 },
+        position: { x: 10, y: 0 },
       }, {
         asset: diamond,
         dimensions: { x: 128, y: 128 },
@@ -147,21 +150,21 @@
       }]
 
       const mainMapActionTiles = {
-        67: () => {
-          if (map === "storeMap") return
-          if (wizdir === "up") {
-            map = "storeMap"
-            wizx = 4
-            wizy = 5
-            wizdir = "right"
-            wizFrames = 4;
-            wizmoving = 1
-            yos = 0
-            xos = 0
-            scrolling = false
-          }
-        },
-        68: () => {
+        // 24: () => {
+        //   if (map === "storeMap") return
+        //   if (wizdir === "up") {
+        //     map = "storeMap"
+        //     wizx = 4
+        //     wizy = 5
+        //     wizdir = "right"
+        //     wizFrames = 4;
+        //     wizmoving = 1
+        //     yos = 0
+        //     xos = 0
+        //     scrolling = false
+        //   }
+        // },
+        24: () => {
           if (map === "storeMap") return
           if (wizdir !== "down") {
             map = "storeMap"
@@ -196,7 +199,7 @@
         }
       }, {})
 
-      const createMap = (height, width, large, worldSize = 50, actionTiles, assets = [], walls = [], defaultTile = 'tile') => {
+      const createMap = (height, width, large, worldSize = 50, actionTiles, assets = [], walls = [], defaultTile = 'planks') => {
         const map = []
         const xOffset = width < screenTileWidth ? (screenTileWidth - width) / 2 : 0
         const yOffset = height < screenTileWidth ? (screenTileHeight - height) / 2 : 0
@@ -240,8 +243,8 @@
           if (map === "mainMap") return
           if (wizdir === "down") {
             map = "mainMap"
-            wizx = 5
-            wizy = 7
+            wizx = 2
+            wizy = 4
             wizdir = "down"
             wizFrames = 4;
             wizmoving = 1
@@ -285,7 +288,7 @@
 
       let map = "mainMap";
       let wizx = 3;
-      let wizy = 3;
+      let wizy = 4;
       let wizdir = "down";
       let wizFrames;
       let wizJumpFrames;

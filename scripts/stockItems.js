@@ -1,20 +1,70 @@
-module.exports = [{
-  name: "Chinese Cigarettes",
-  wholesalePrice: 3,
-  demand: [8, 10],
-  expiry: 30 * 12
-}, {
-  name: "Chew Dude Gum",
-  wholesalePrice: 0.01,
-  demand: [2, 2],
-  expiry: 30 * 6
-},{
-  name: "Shifty TM Power bank",
-  wholesalePrice: 10,
-  demand: [0, 10]
-}, {
-  name: "Big Banana",
-  demand: [5, 5],
-  wholesalePrice: 0.01,
-  expiry: 7
-}]
+exports.wholesale = [
+  {
+    name: "Chinese Cigarettes",
+    price: 3,
+    markup: 2,
+    demand: [8, 10],
+    expiry: 30 * 12,
+  },
+  {
+    name: "Chew Dude Gum",
+    price: 0.01,
+    markup: 2,
+    demand: [2, 2],
+    expiry: 30 * 6,
+  },
+  {
+    name: "Shifty TM Power bank",
+    price: 10,
+    markup: 2,
+    demand: [0, 10],
+  },
+  {
+    name: "Big Banana",
+    demand: [5, 5],
+    markup: 5,
+    price: 0.01,
+    expiry: 7,
+  },
+  {
+    name: "German Car Fans Magazine",
+    demand: [5, 5],
+    price: 5,
+    markup: 2,
+    expiry: 7,
+  },
+  {
+    name: "Povo Phone Top Up $5",
+    demand: [5, 5],
+    price: 4.5,
+    expiry: 7,
+  },
+  {
+    name: "Povo Phone Top Up $15",
+    demand: [5, 5],
+    markup: 1.1,
+    price: 13.5,
+    expiry: 7,
+  },
+  {
+    name: "Povo Phone Top Up $20",
+    demand: [5, 5],
+    markup: 1.1,
+    price: 18,
+    expiry: 7,
+  },
+  {
+    name: "Povo Phone Top Up $25",
+    demand: [5, 5],
+    price: 22.5,
+    markup: 1.1,
+    expiry: 7,
+  },
+  {
+    name: "Povo Phone Top Up $30",
+    demand: [5, 5],
+    price: 27,
+    markup: 1.1,
+    expiry: 7,
+  },
+];
