@@ -1,12 +1,20 @@
-const prompt = async () =>
-  new Promise((res, rej) => {
-    process.stdin.on("data", (data) => {
-      return res(data.toString().trim());
+const { createCustomer } = require("./customer");
+const getPrompt = () => {
+  const stdin = process.stdin;
+  return async () =>
+    new Promise((res, rej) => {
+      stdin.on("data", (data) => {
+        res(data.toString().trim());
+        stdin.removeAllListeners();
+      });
+      stdin.on("error", rej);
     });
-    process.stdin.on("error", rej);
-  });
+};
 
-const cli = async (wholesaler, store, clock, customerFactory) => {
+const prompt = getPrompt();
+
+const cli = async (wholesaler, store, clock) => {
+  // console.clear();
   console.log(`
     commands:
     - ws: warehouse stock
@@ -14,8 +22,10 @@ const cli = async (wholesaler, store, clock, customerFactory) => {
     - buy: buy an item
     - bal: get shop balance
     - time: get world time
+    - cust: create a customer event
   `);
   const input = await prompt();
+  console.clear();
   if (input === "ws") {
     const list = wholesaler.stock.getStockReport();
     console.table(list);
@@ -40,6 +50,9 @@ const cli = async (wholesaler, store, clock, customerFactory) => {
     console.log(clock.getTime());
   }
 
+  if (input === "cust") {
+    createCustomer(store);
+  }
   return cli(wholesaler, store, clock);
 };
 

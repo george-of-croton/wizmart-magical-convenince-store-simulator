@@ -40,3 +40,5 @@ exports.fluctuation = () => {
 
   return lastDigit > 4 ? -(num * multiplier) : num * multiplier;
 };
+
+exports.nameToItemId = (name) => name.split(" ").join("_");

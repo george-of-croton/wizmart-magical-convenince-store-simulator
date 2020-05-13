@@ -1,3 +1,4 @@
+const { nameToItemId } = require("./utils");
 const createAccount = (initialBalance) => {
   let balance = initialBalance;
 
@@ -28,9 +29,15 @@ const createAccount = (initialBalance) => {
   };
 };
 
-const cashRegister = (stockRoom) => {
-  const account = createAccount(5);
+const cashRegister = (stockRoom, initialBalance = 50) => {
+  const account = createAccount(initialBalance);
   const sell = (item, wallet, fn) => {
+    console.log(item);
+    const itemInStock = stockRoom.hasItem(item, "id");
+    if (!itemInStock) {
+      console.log(item, "item unvailable");
+      return;
+    }
     const itemDetails = stockRoom.depleteStock(item);
     if (!wallet.balance() >= itemDetails.price) {
       console.log("insufficient funds", {

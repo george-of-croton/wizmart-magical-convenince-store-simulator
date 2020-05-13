@@ -18,8 +18,6 @@ exports.stockRoom = (initialStock = [], capacity = Infinity) => {
   };
 
   const depleteStock = (item) => {
-    console.log({ item });
-    console.log(stockList);
     const [soldItem, ...rest] = stockList.filter(
       (stockItem) => stockItem.id === item
     );
@@ -46,9 +44,11 @@ exports.stockRoom = (initialStock = [], capacity = Infinity) => {
     });
     return fromPairs(pairs);
   };
-  const hasItem = (itemId) => {
-    const [item] = getStockList("itemId")[itemId];
-    if (item) {
+
+  const hasItem = (itemId, byKey = "itemId") => {
+    const items = getStockList(byKey)[itemId];
+    if (items) {
+      const [item] = items;
       return item;
     }
     return false;

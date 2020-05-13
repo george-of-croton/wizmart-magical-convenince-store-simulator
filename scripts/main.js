@@ -7,10 +7,3 @@ const clock = worldClock();
 const mainWholesaler = wholesaler(clock);
 const store = shop(clock);
 cli(mainWholesaler, store, clock);
-
-// await new Promise((res) =>
-// setInterval(() => {
-//   if (false) {
-//     res();
-//   }
-// // }

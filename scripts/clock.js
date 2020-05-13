@@ -16,7 +16,7 @@ exports.worldClock = () => {
   const addHandler = (fn, freq) => handlers[freq].push(fn);
 
   const getTime = () => {
-    const day = time / 300;
+    const day = time / 1440;
     const hours = time / 60;
 
     return {

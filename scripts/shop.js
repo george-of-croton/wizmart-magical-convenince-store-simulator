@@ -1,8 +1,9 @@
 const { stockRoom } = require("./stockRoom");
 const { cashRegister } = require("./account");
+const stockItems = require("./stockItems");
 exports.shop = (clock) => {
-  const register = cashRegister();
-  const stock = stockRoom();
+  const stock = stockRoom(stockItems.wholesale);
+  const register = cashRegister(stock);
 
   return {
     register,
