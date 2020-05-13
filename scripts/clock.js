@@ -11,18 +11,18 @@ exports.worldClock = () => {
         handler();
       }
     }
-  }, 3000);
+  }, 10);
 
   const addHandler = (fn, freq) => handlers[freq].push(fn);
 
   const getTime = () => {
-    const day = time / 1440;
-    const hours = time / 60;
+    const days = Math.floor(time / 1440);
+    const hours = Math.floor(time / 60 - days);
 
     return {
-      day,
+      days,
       hours,
-      minutes: time,
+      minutes: time - (days * 1440 + hours * 60),
     };
   };
 
