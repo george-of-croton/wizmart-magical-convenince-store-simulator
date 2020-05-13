@@ -11,7 +11,7 @@ exports.worldClock = () => {
         handler();
       }
     }
-  }, 10);
+  }, 3000);
 
   const addHandler = (fn, freq) => handlers[freq].push(fn);
 
