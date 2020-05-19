@@ -13,10 +13,7 @@ const createAccount = (initialBalance) => {
   };
 
   debit = (amount, ref) => {
-    console.log("sdas");
     balance = balance - amount;
-    console.log("balance", balance);
-    console.log(balance);
     ledger.debit.push([amount, ref]);
     return balance;
   };
@@ -32,7 +29,6 @@ const createAccount = (initialBalance) => {
 const cashRegister = (stockRoom, initialBalance = 50) => {
   const account = createAccount(initialBalance);
   const sell = (item, wallet, fn) => {
-    console.log(item);
     const itemInStock = stockRoom.hasItem(item, "id");
     if (!itemInStock) {
       console.log(item, "item unvailable");

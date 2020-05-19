@@ -32,8 +32,8 @@ const cli = async (wholesaler, store, clock) => {
   }
 
   if (input === "ss") {
-    const list = store.stock.getStockList();
-    console.log(list);
+    const list = store.stock.getStockReport();
+    console.table(list);
   }
 
   if (input === "buy") {
@@ -43,15 +43,16 @@ const cli = async (wholesaler, store, clock) => {
   }
 
   if (input === "bal") {
-    console.log(store.register.account.balance());
+    console.table({ balance: store.register.account.balance() });
   }
 
   if (input === "time") {
-    console.log(clock.getTime());
+    console.table(clock.getTime());
   }
 
   if (input === "cust") {
-    createCustomer(store);
+    const receipt = createCustomer(store);
+    console.log(receipt)
   }
   return cli(wholesaler, store, clock);
 };

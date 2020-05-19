@@ -1,16 +1,18 @@
 const stockItems = require("./stockItems");
 const { createAccount } = require("./account");
 const { nameToItemId } = require("./utils");
+const random = () => Math.floor(Math.random() * 10);
 customer = (balance, shop) => {
   const account = createAccount(balance);
   const numberOfActions = Math.floor((Math.random() * 10) / 2);
   const affordableItems = stockItems.wholesale.filter(
     ({ price, markup }) => price * markup < balance
   );
+
   const actionList = Array(numberOfActions)
-    .fill(Math.floor(Math.random() * 10))
+    .fill()
     .reduce((acc, cur) => {
-      const item = affordableItems[cur];
+      const item = affordableItems[random()];
 
       if (item) {
         return [item, ...acc];
@@ -23,10 +25,13 @@ customer = (balance, shop) => {
   for (const action of actionList) {
     const item = shop.stock.hasItem(nameToItemId(action.name));
     if (!item) {
-      return;
+      console.log(action.name, "not in stock");
+      break;
     }
     shop.register.sell(item.id, account);
     receipt.push(item);
+    console.log("sale successful:");
+    console.table(receipt);
   }
 
   return receipt;
@@ -37,5 +42,5 @@ exports.createCustomer = (shop) => {
     1,
     (2 ** 32 / (Math.random() * 1e8 + 1)) * (1 - 0.01)
   );
-  customer(initialBalance, shop);
+  return customer(initialBalance, shop);
 };

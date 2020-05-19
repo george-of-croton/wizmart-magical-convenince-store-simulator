@@ -17,7 +17,6 @@ exports.wholesaler = (clock) => {
     const stock = wholesaleStockRoom.getStockList();
     const nextStock = toPairs(stock)
       .map(([key, val]) => {
-        console.log(val);
         const [{ price }] = val;
         const fluctuation = fluctuation();
         return {

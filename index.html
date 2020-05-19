@@ -1,570 +1,421 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My first three.js app</title>
+    <div id="toolbar">
+      editor mode
+      <input id="ed" type="checkbox" />
+      <input id="menu" type="checkbox" />
 
-<head>
-  <meta charset="utf-8">
-  <title>My first three.js app</title>
-  <div id="toolbar">
-    editor mode
-    <input id="ed" type="checkbox"></input>
-    <button id="ps">print state</button>
-    <select id="tile" type="select" value="path">
-      <option>path</option>
-      <option>tree</option>
-    </select>
-    x:
-    <span id="x"></span>
-    y:
-    <span id="y"></span>
-  </div>
-  <style>
-    body {
-      margin: 0;
-      background-color: black;
-    }
-
-    #toolbar {
-      color: white;
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 300px;
-    }
-
-    canvas {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-
-    }
-  </style>
-</head>
-
-<body>
-  <!-- <script src="js/three.js"></script> -->
-  <script>
-
-    function setAttributes(element, attributes) {
-      for (const [attr, val] of attributes) {
-        element.setAttribute(attr, val)
-      }
-      return element
-    }
-    let developermode
-
-
-    function main() {
-
-      const setup = () => {
-        const canvas = document.createElement("canvas")
-        var height = 300
-        var width = 300
-        setAttributes(canvas, [["id", "canvas"], ["height", 800], ["width", 1024], ["background-color", "black"]])
-        document.body.appendChild(canvas)
-        return canvas
+      <button id="ps">print state</button>
+      <select id="tile" type="select" value="path">
+        <option>path</option>
+        <option>tree</option>
+      </select>
+      x:
+      <span id="x"></span>
+      y:
+      <span id="y"></span>
+    </div>
+    <style>
+      body {
+        margin: 0;
+        background-color: black;
       }
 
-      const canvas = setup()
-      const ctx = canvas.getContext("2d")
-      const tileSize = 64
-
-      // ctx.scale(2, 2)
-      let wizardLeft = new Image(tileSize, tileSize)
-      wizardLeft.src = "assets/pix-wiz-left.png"
-      let wizardRight = new Image(tileSize, tileSize)
-      wizardRight.src = "assets/pix-wiz-right.png"
-      const counter = new Image()
-      counter.src = "assets/counter.png"
-      const wall = new Image()
-      wall.src = "assets/wall.png"
-      let man = new Image()
-      man.src = "assets/man.png"
-      let diamond = new Image()
-      diamond.src = "assets/diamond.png"
-
-      const spriteMap = {
-        "down": [wizardLeft, wizardLeft],
-        "up": [wizardRight, wizardRight],
-        "left": [wizardLeft, wizardLeft],
-        "right": [wizardRight, wizardRight]
-      }
-      let dog = new Image(tileSize, tileSize)
-      dog.src = "assets/dog.png"
-
-      let pyramid = new Image(256, 256)
-      pyramid.src = "assets/pyramid.png"
-      let store = new Image(100, 100)
-      store.src = "assets/store.png"
-
-      let wizmart = new Image(100, 100)
-      wizmart.src = "assets/wizmart.png"
-      let path = new Image(tileSize, tileSize)
-      path.src = "assets/grass.png"
-      let planks = new Image(tileSize, tileSize)
-      planks.src = "assets/planks.png"
-      let tile = new Image(tileSize, tileSize)
-      tile.src = "assets/tile.png"
-      let mat = new Image(tileSize, tileSize)
-      mat.src = "assets/mat.png"
-      let tree = new Image(tileSize, tileSize)
-      tree.src = "assets/tree.png"
-      // let house = new Image(1tileSize, 1tileSize)
-      // house.src = "house.png"
-      const tileMap = {
-        tree: tree,
-        path: path,
-        tile,
-        mat,
-        wizmart,
-        planks
+      #toolbar {
+        color: white;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 300px;
       }
 
-      const debounce = (func, wait, immediate) => {
-        let timeout
-        return (args) => {
-          const later = () => timeout = null
-          func(args)
+      canvas {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- <script src="js/three.js"></script> -->
+    <script src="scripts/render/index.js"></script>
+    <script>
+      function setAttributes(element, attributes) {
+        for (const [attr, val] of attributes) {
+          element.setAttribute(attr, val);
         }
-        const callNow = !timeout
-        timeout = setTimeout(later, wait)
-        if (callNow) func(args)
+        return element;
       }
+      let developermode;
 
-      const mainMapAssets = [{
-        asset: store,
-        dimensions: { x: 256, y: 256 },
-        position: { x: 0, y: 0 },
-      }, {
-        asset: pyramid,
-        dimensions: { x: 256, y: 256 },
-        position: { x: 5, y: 0 },
+      function main() {
+        const setup = () => {
+          const canvas = document.createElement("canvas");
+          var height = 300;
+          var width = 300;
+          setAttributes(canvas, [
+            ["id", "canvas"],
+            ["height", 800],
+            ["width", 1024],
+            ["background-color", "black"],
+          ]);
+          document.body.appendChild(canvas);
+          return canvas;
+        };
 
-      }, {
-        asset: wizmart,
-        dimensions: { x: 256, y: 512 },
-        position: { x: 10, y: 0 },
-      }, {
-        asset: diamond,
-        dimensions: { x: 128, y: 128 },
-        position: { x: 6, y: 12 },
-        scale: 2
-      }]
+        const canvas = setup();
+        const ctx = canvas.getContext("2d");
+        const tileSize = 64;
 
-      const mainMapActionTiles = {
-        // 24: () => {
-        //   if (map === "storeMap") return
-        //   if (wizdir === "up") {
-        //     map = "storeMap"
-        //     wizx = 4
-        //     wizy = 5
-        //     wizdir = "right"
-        //     wizFrames = 4;
-        //     wizmoving = 1
-        //     yos = 0
-        //     xos = 0
-        //     scrolling = false
-        //   }
-        // },
-        24: () => {
-          if (map === "storeMap") return
-          if (wizdir !== "down") {
-            map = "storeMap"
-            wizx = 8
-            wizy = 9
-            wizdir = "up"
-            wizFrames = 4;
-            wizmoving = 1
-            yos = 0
-            xos = 0
-            scrolling = false
-          }
-        }
-      }
-      const screenTileHeight = 12
-      const screenTileWidth = 16
+        // ctx.scale(2, 2)
+        let wizardLeft = new Image(tileSize, tileSize);
+        wizardLeft.src = "assets/pix-wiz-left.png";
+        let wizardRight = new Image(tileSize, tileSize);
+        wizardRight.src = "assets/pix-wiz-right.png";
+        const counter = new Image();
+        counter.src = "assets/counter.png";
+        const wall = new Image();
+        wall.src = "assets/wall.png";
+        let man = new Image();
+        man.src = "assets/man.png";
+        let diamond = new Image();
+        diamond.src = "assets/diamond.png";
+        let frame = new Image();
+        frame.src = "assets/frame.png";
+        let balance = new Image();
+        balance.src = "assets/balance.png";
 
-      const createWalls = (assets) => assets.reduce((acc, asset) => {
-        const tilesx = asset.dimensions.x / tileSize
-        const tilesY = asset.dimensions.y / tileSize
-        const tiles = {
+        const spriteMap = {
+          D: [wizardLeft, wizardLeft],
+          R: [wizardRight, wizardRight],
+          L: [wizardLeft, wizardLeft],
+          U: [wizardRight, wizardRight],
+        };
+        let dog = new Image(tileSize, tileSize);
+        dog.src = "assets/dog.png";
 
-        }
-        for (let x = 0; x < tilesx; x++) {
-          for (let y = 0; y < tilesY; y++) {
-            tiles[String(asset.position.x + x) + "-" + String(asset.position.y + y)] = true
-          }
-        }
-        return {
-          ...tiles,
-          ...acc
-        }
-      }, {})
+        let pyramid = new Image(256, 256);
+        pyramid.src = "assets/pyramid.png";
+        let store = new Image(100, 100);
+        store.src = "assets/store.png";
 
-      const createMap = (height, width, large, worldSize = 50, actionTiles, assets = [], walls = [], defaultTile = 'planks') => {
-        const map = []
-        const xOffset = width < screenTileWidth ? (screenTileWidth - width) / 2 : 0
-        const yOffset = height < screenTileWidth ? (screenTileHeight - height) / 2 : 0
-        console.log({ xOffset, yOffset })
-        for (let x = 0; x < worldSize; x++)
-          for (let y = 0; y < worldSize; y++) {
-            if (!map[x]) {
-              map[x] = []
-            }
-            map[x][y] = {};
-            if (xOffset) {
-              if (x > xOffset && x < (screenTileWidth - xOffset) && y > yOffset && y < (screenTileHeight - yOffset)) {
-                console.log("tile")
-                map[x][y].tile = defaultTile
+        // let wizmart = new Image(100, 100);
+        // wizmart.src = "assets/wizmart.png";
+        // let path = new Image(tileSize, tileSize);
+        // path.src = "assets/grass.png";
+        // let planks = new Image(tileSize, tileSize);
+        // planks.src = "assets/planks.png";
+        // let tile = new Image(tileSize, tileSize);
+        // tile.src = "assets/tile.png";
+        // let mat = new Image(tileSize, tileSize);
+        // mat.src = "assets/mat.png";
+        // let tree = new Image(tileSize, tileSize);
+        // tree.src = "assets/tree.png";
+        // let house = new Image(1tileSize, 1tileSize)
+        // house.src = "house.png"
+        const tileMap = {
+          tree: tree,
+          path: path,
+          tile,
+          mat,
+          wizmart,
+          planks,
+        };
+
+        const debounce = (func, wait, immediate) => {
+          let timeout;
+          return (args) => {
+            const later = () => (timeout = null);
+            func(args);
+          };
+          const callNow = !timeout;
+          timeout = setTimeout(later, wait);
+          if (callNow) func(args);
+        };
+
+        const mainMapAssets = [
+          {
+            asset: store,
+            dimensions: { x: 256, y: 256 },
+            position: { x: 0, y: 0 },
+          },
+          {
+            asset: pyramid,
+            dimensions: { x: 256, y: 256 },
+            position: { x: 5, y: 0 },
+          },
+          {
+            asset: wizmart,
+            dimensions: { x: 256, y: 512 },
+            position: { x: 10, y: 0 },
+          },
+          {
+            asset: diamond,
+            dimensions: { x: 128, y: 128 },
+            position: { x: 6, y: 12 },
+            scale: 2,
+          },
+        ];
+
+        const screenTileHeight = 12;
+        const screenTileWidth = 16;
+
+        const createWalls = (assets) =>
+          assets.reduce((acc, asset) => {
+            const tilesx = asset.dimensions.x / tileSize;
+            const tilesY = asset.dimensions.y / tileSize;
+            const tiles = {};
+            for (let x = 0; x < tilesx; x++) {
+              for (let y = 0; y < tilesY; y++) {
+                tiles[
+                  String(asset.position.x + x) +
+                    "-" +
+                    String(asset.position.y + y)
+                ] = true;
               }
-            } else {
-              map[x][y].tile = defaultTile
             }
-            if (actionTiles[[x, y].join("")]) {
-              map[x][y].action = actionTiles[[x, y].join("")]
-              map[x][y].tile = "mat"
+            return {
+              ...tiles,
+              ...acc,
+            };
+          }, {});
+
+        const storeActionTiles = {
+          89: () => {
+            console.log("here");
+            if (map === "mainMap") return;
+            if (wizdir === "down") {
+              map = "mainMap";
+              wizx = 2;
+              wizy = 4;
+              wizdir = "down";
+              wizFrames = 4;
+              wizmoving = 1;
+              yos = 3;
+              xos = 0;
+              scrolling = false;
             }
+          },
+        };
+
+        const storeWalls = [
+          {
+            dimensions: { x: 64, y: 64 * 5 },
+            position: { x: 5, y: 4 },
+          },
+          {
+            dimensions: { x: 64 * 5, y: 64 },
+            position: { x: 6, y: 3 },
+          },
+          {
+            dimensions: { x: 64, y: 64 * 5 },
+            position: { x: 11, y: 4 },
+          },
+          {
+            dimensions: { x: 64 * 6, y: 64 },
+            position: { x: 5, y: 10 },
+          },
+        ];
+
+        const storeMap = createMap(
+          7,
+          5,
+          false,
+          28,
+          storeActionTiles,
+          [
+            {
+              dimensions: { x: 64 * 4, y: 64 },
+              position: { x: 6, y: 5 },
+              asset: counter,
+            },
+            {
+              dimensions: { x: 64 * 5, y: 64 * 2 },
+              position: { x: 6, y: 2 },
+              asset: wall,
+            },
+          ],
+          storeWalls
+        );
+
+        let map = "mainMap";
+        let wizx = 3;
+        let wizy = 4;
+        let wizdir = "down";
+        let wizFrames;
+        let scrolling = false;
+        let xos = 0;
+        let yos = 0;
+        let ymod = 0;
+        let wizmoving = 0;
+        let sceneTransition = 0;
+
+        const maps = {
+          mainMap,
+          storeMap,
+        };
+        const renderSize = developermode ? 20 : screenTileWidth;
+        let menuOpen = false;
+
+        const UIList = ({ menuOpen = false }) => {
+          //background
+          if (menuOpen) {
+            ctx.fillRect(0, 0, 1024, 800);
           }
+        };
 
-        const mapWalls = createWalls([...assets, ...walls])
-        const hasWall = (x, y, direction) => {
-          const dirMap = {
-            up: String(x) + '-' + String(y - 1),
-            down: String(x) + '-' + String(y + 1),
-            left: String(x - 1) + '-' + String(y),
-            right: String(x + 1) + '-' + String(y),
+        const gameState = {
+          wizard,
+        };
+
+        function render(ctx, scene) {
+          document.getElementById("x").innerText = wizx;
+          document.getElementById("y").innerText = wizy;
+          const state = scene.getMap();
+
+          const mapsize = maps[map].mapSize;
+          if (mapsize <= 28) scrolling = false;
+
+          const offset = mainWorld.getOffset();
+
+          const wizardSprite = spriteMap["L"];
+          ctx.clearRect(0, 0, 800, 1200);
+          if (sceneTransition) {
+            sceneTransition -= 1;
+            return;
           }
-          return Boolean(mapWalls[dirMap[direction]])
-        }
-        return { map, mapSize: worldSize, assets, actionTiles, mapWalls: createWalls([...assets, ...walls]), hasWall, }
-      }
-
-      const storeActionTiles = {
-        89: () => {
-          console.log("here")
-          if (map === "mainMap") return
-          if (wizdir === "down") {
-            map = "mainMap"
-            wizx = 2
-            wizy = 4
-            wizdir = "down"
-            wizFrames = 4;
-            wizmoving = 1
-            yos = 3
-            xos = 0
-            scrolling = false
-          }
-        }
-      }
-
-      const storeWalls = [
-        {
-          dimensions: { x: 64, y: 64 * 5 },
-          position: { x: 5, y: 4 }
-        },
-        {
-          dimensions: { x: 64 * 5, y: 64 },
-          position: { x: 6, y: 3 }
-        },
-        {
-          dimensions: { x: 64, y: 64 * 5 },
-          position: { x: 11, y: 4 }
-        },
-        {
-          dimensions: { x: 64 * 6, y: 64 },
-          position: { x: 5, y: 10 }
-        }
-      ]
-
-      const storeMap = createMap(7, 5, false, 28, storeActionTiles, [    {
-          dimensions: { x: 64 * 4, y: 64 },
-          position: { x: 6, y: 5 },
-          asset: counter
-        }, {
-          dimensions: { x: 64 * 5, y: 64 * 2 },
-          position: { x: 6, y: 2 },
-          asset: wall
-        }], storeWalls)
-
-      const mainMap = createMap(Infinity, Infinity, true, 500, mainMapActionTiles, mainMapAssets,[], "path")
-
-      let map = "mainMap";
-      let wizx = 3;
-      let wizy = 4;
-      let wizdir = "down";
-      let wizFrames;
-      let wizJumpFrames;
-      let wizjumping;
-      let scrolling = false;
-      let xos = 0;
-      let yos = 0;
-      let ymod = 0;
-      let wizmoving = 0;
-      let sceneTransition = 0;
-
-      const maps = {
-        mainMap,
-        storeMap
-      }
-      const renderSize = developermode ? 20 : screenTileWidth
-
-
-      function render(ctx, state) {
-        document.getElementById("x").innerText = wizx;
-        document.getElementById("y").innerText = wizy
-
-        const mapsize = maps[map].mapSize
-        if (mapsize <= 28) scrolling = false
-
-        const offsetX = wizx - xos
-        const offsetY = wizy - yos
-        if (developermode) {
-          xos = 0
-          yos = 0
-          scrolling = false
-
-        }
-        const jump = [3, 5, 10, 3, 0, 0]
-        const wizardSprite = spriteMap[wizdir][wizmoving % 2]
-        ctx.clearRect(0, 0, 800, 1200)
-        if (sceneTransition) {
-          sceneTransition -= 1
-          return
-        }
-        for (let x = 0; x < renderSize + 1; x++) {
-          for (let y = 0; y < renderSize; y++) {
-            try {
-              if (state[x + xos][y + yos].tile) {
-                if (scrolling) {
-                  if (wizdir === "right") {
-                    ctx.drawImage(tileMap[state[x + xos - 1][y + yos].tile], ((x) * tileSize) - ((tileSize / wizFrames) * wizmoving), y * tileSize, tileSize, tileSize)
-
-                  }
-
-                  if (wizdir === "left") {
-                    ctx.drawImage(tileMap[state[x + xos][y + yos].tile], ((x - 1) * tileSize) + ((tileSize / wizFrames) * wizmoving), y * tileSize, tileSize, tileSize)
-
-                  }
-
-                  if (wizdir === "down") {
-                    ctx.drawImage(tileMap[state[x + xos][y + yos - 1].tile], x * tileSize, ((y) * tileSize) - ((tileSize / wizFrames) * wizmoving), tileSize, tileSize)
-
-                  }
-                  if (wizdir === "up") {
-                    ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * tileSize, ((y - 1) * tileSize) + ((tileSize / wizFrames) * wizmoving), tileSize, tileSize)
-                  }
+          for (let x = 0; x < renderSize + 1; x++) {
+            for (let y = 0; y < renderSize; y++) {
+              try {
+                if (state[x + offset.x][y + offset.y].tile) {
+                  scene.renderTile(ctx, x, y, wizard);
                 } else {
                   ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-                  ctx.drawImage(tileMap[state[x + xos][y + yos].tile], x * tileSize, y * tileSize, tileSize, tileSize)
                 }
-              } else {
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+              } catch (e) {
+                console.log("error");
+                console.log(wizard.getPosition(), mainWorld.getOffset());
+                throw e;
               }
-            } catch (e) {
-              console.log("error", { x, y, scrolling, xos, yos, wizx, wizy })
-              throw e
             }
-
-
           }
-        }
-
-        for ({ asset, position, dimensions } of maps[map].assets) {
-          if (scrolling) {
-            if (wizdir === "right") {
-              ctx.drawImage(asset, ((tileSize * position.x) - (tileSize * (xos - 1))) - ((tileSize / wizFrames) * wizmoving), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
-            }
-
-            if (wizdir === "left") {
-              ctx.drawImage(asset, ((tileSize * position.x) - (tileSize * (xos + 1))) + ((tileSize / wizFrames) * wizmoving), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
-            }
-
-            if (wizdir === "down") {
-              ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * (yos - 1)) - ((tileSize / wizFrames) * wizmoving), dimensions.x, dimensions.y)
-            }
-
-            if (wizdir === "up") {
-              ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * (yos + 1)) + ((tileSize / wizFrames) * wizmoving), dimensions.x, dimensions.y)
-            }
-
-          } else {
-            ctx.drawImage(asset, (tileSize * position.x) - (tileSize * xos), (tileSize * position.y) - (tileSize * yos), dimensions.x, dimensions.y)
-          }
-        }
-
-
-        if (wizjumping) {
-          const step = jump[wizjumping - 1]
-          ymod = step * 2
-          wizjumping += 1
-        }
-
-
-        if (state[wizx][wizy].action) {
-          state[wizx][wizy].action()
-        }
-        if (wizmoving) {
-          if (wizdir === "left") {
+          // const
+          for ({ asset, position, dimensions } of maps[map].assets) {
             if (scrolling) {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
-            } else {
-              ctx.drawImage(wizardSprite, ((wizx + 1) - xos) * tileSize - ((tileSize / wizFrames) * wizmoving), (wizy - yos) * tileSize)
-            }
-          }
-          if (wizdir === "right") {
-            if (scrolling) {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
-            } else {
-              ctx.drawImage(wizardSprite, ((wizx - 1) - xos) * tileSize + ((tileSize / wizFrames) * wizmoving), (wizy - yos) * tileSize, 46, 64)
-            }
+              if (wizdir === "right") {
+                ctx.drawImage(
+                  asset,
+                  tileSize * position.x -
+                    tileSize * (xos - 1) -
+                    (tileSize / wizFrames) * wizmoving,
+                  tileSize * position.y - tileSize * yos,
+                  dimensions.x,
+                  dimensions.y
+                );
+              }
 
-          }
-          if (wizdir === "down") {
-            if (scrolling) {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
+              if (wizdir === "left") {
+                ctx.drawImage(
+                  asset,
+                  tileSize * position.x -
+                    tileSize * (xos + 1) +
+                    (tileSize / wizFrames) * wizmoving,
+                  tileSize * position.y - tileSize * yos,
+                  dimensions.x,
+                  dimensions.y
+                );
+              }
+
+              if (wizdir === "down") {
+                ctx.drawImage(
+                  asset,
+                  tileSize * position.x - tileSize * xos,
+                  tileSize * position.y -
+                    tileSize * (yos - 1) -
+                    (tileSize / wizFrames) * wizmoving,
+                  dimensions.x,
+                  dimensions.y
+                );
+              }
+
+              if (wizdir === "up") {
+                ctx.drawImage(
+                  asset,
+                  tileSize * position.x - tileSize * xos,
+                  tileSize * position.y -
+                    tileSize * (yos + 1) +
+                    (tileSize / wizFrames) * wizmoving,
+                  dimensions.x,
+                  dimensions.y
+                );
+              }
             } else {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy - 1) - yos) * tileSize + ((tileSize / wizFrames) * wizmoving), 64, 64)
+              ctx.drawImage(
+                asset,
+                tileSize * position.x - tileSize * xos,
+                tileSize * position.y - tileSize * yos,
+                dimensions.x,
+                dimensions.y
+              );
             }
           }
-          if (wizdir === "up") {
-            if (scrolling) {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, (wizy - yos) * tileSize, 64, 64)
+          UIList({ menuOpen });
 
-            } else {
-              ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy + 1) - yos) * tileSize - ((tileSize / wizFrames) * wizmoving), 64, 64)
-            }
-          }
+          const funds = 50;
 
-          if (wizmoving === wizFrames) {
-            wizmoving = 0
-            wizFrames = 0
-            scrolling = false
-          } else {
-            wizmoving += 1
+          ctx.drawImage(frame, 0, 0, 1024, 800);
+          ctx.font = "32px Georgia";
+          ctx.drawImage(balance, 768, 672, 256, 128);
+          ctx.fillText(funds.toFixed(2), 870, 750);
+
+          if (state[wizx][wizy].action) {
+            state[wizx][wizy].action();
           }
-        } else {
-          if (wizjumping === wizJumpFrames) {
-            wizJumpFrames = 0
-            wizjumping = 0
-          }
-          ctx.drawImage(wizardSprite, (wizx - xos) * tileSize, ((wizy - yos) * tileSize) - ymod, 64, 64)
+          ctx.drawImage(...wizard.getRender({ scene: mainWorld }));
+          wizard.onTick(mainWorld);
         }
 
+        const psButton = document.getElementById("ps");
+        const emButton = document.getElementById("ed");
+        const menuButton = document.getElementById("menu");
 
+        //// HANDLERS
+
+        ps.addEventListener("click", () => {
+          console.log(JSON.stringify(state));
+        });
+
+        emButton.addEventListener("change", () => {
+          console.log(emButton.value);
+          if (developermode) {
+            canvas.setAttribute("height", "300");
+            canvas.setAttribute("width", "300");
+            return (developermode = false);
+          }
+          canvas.setAttribute("height", "600");
+          canvas.setAttribute("width", "600");
+          return (developermode = true);
+        });
+
+        menuButton.addEventListener("change", () => {
+          menuOpen = !menuOpen;
+        });
+
+        canvas.addEventListener("mousedown", (e) => {
+          const x = e.offsetX / tileSize + xos;
+          const y = e.offsetY / tileSize + yos;
+          const prev = maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)];
+          const tile = document.getElementById("tile").value;
+          maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)] = { tile };
+        });
+        setInterval(() => render(ctx, mainWorld), 50);
+        // controller({currentMap})
       }
 
-      const psButton = document.getElementById("ps")
-      const emButton = document.getElementById("ed")
-
-      ps.addEventListener("click", () => {
-        console.log(JSON.stringify(state))
-      })
-
-      emButton.addEventListener("change", () => {
-        console.log(emButton.value)
-        if (developermode) {
-          canvas.setAttribute("height", "300")
-          canvas.setAttribute("width", "300")
-          return developermode = false
-        }
-        canvas.setAttribute("height", "600")
-        canvas.setAttribute("width", "600")
-        return developermode = true
-      })
-
-
-
-
-      document.addEventListener('keydown', (e) => {
-        const currentMap = maps[map]
-
-        if (wizmoving) return
-        const mapsize = maps[map].mapSize
-        const bigMap = mapsize > 29
-
-
-        if (e.key === "ArrowRight" && wizx < mapsize - 4) {
-          if (wizdir === "left") {
-            wizdir = "right"
-            return
-          }
-          wizdir = "right"
-          if (currentMap.hasWall(wizx, wizy, "right")) {
-            return
-          }
-          console.log()
-          if (bigMap && wizx - xos > 5 && wizx + (renderSize + 1) < mapsize) {
-            xos += 1
-            scrolling = true
-          }
-          wizmoving = 1
-          wizFrames = 4;
-          wizdir
-          return wizx += 1
-        }
-        if (e.key === "ArrowLeft" && wizx > 0) {
-          if (wizdir === "right") {
-            wizdir = "left"
-            return
-          }
-          if (currentMap.hasWall(wizx, wizy, "left")) return
-          if (bigMap && xos > 0 && (wizx - xos) < 4) {
-            xos -= 1
-            scrolling = true
-          }
-          wizdir = "left"
-          wizmoving = 1
-          wizFrames = 4;
-          wizdir
-          return wizx -= 1
-        }
-
-        if (e.key === "ArrowDown" && wizy < mapsize - 2) {
-
-          wizdir = "down"
-          if (currentMap.hasWall(wizx, wizy, "down")) return
-
-          if (bigMap && (wizy - yos) > screenTileHeight / 2 && (yos + wizy) - (screenTileHeight * 2)  < mapsize - 2) {
-            yos += 1
-            scrolling = true
-          }
-          wizmoving = 1
-          wizFrames = 4;
-          wizdir
-          return wizy += 1
-        }
-
-        if (e.key === "ArrowUp" && wizy > 0) {
-
-          wizdir = "up"
-          if (currentMap.hasWall(wizx, wizy, "up")) return
-          if (bigMap && yos > 0 && (wizy - yos) < 3) {
-            yos -= 1
-            scrolling = true
-          }
-          wizmoving = 1
-          wizFrames = 4;
-          return wizy -= 1
-        }
-
-        if (e.key === " " && wizy > 0) {
-          wizjumping = 1
-          wizJumpFrames = 5
-        }
-      })
-
-      canvas.addEventListener("mousedown", e => {
-        const x = e.offsetX / tileSize + xos
-        const y = e.offsetY / tileSize + yos
-
-        const prev = maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)]
-        const tile = document.getElementById("tile").value
-        maps[map].map[Math.round(x - 0.5)][Math.round(y - 0.5)] = { tile }
-      })
-      setInterval(() => render(ctx, maps[map].map), 42)
-
-    }
-
-    main()
-  </script>
-</body>
-
+      // main();
+    </script>
+  </body>
 </html>

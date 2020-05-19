@@ -8,9 +8,7 @@ exports.stockRoom = (initialStock = [], capacity = Infinity) => {
   }));
 
   const addStock = (items) => {
-    console.log({ items });
     stockList = stockList.concat(items);
-    console.log(stockList);
   };
 
   const updateStockList = (nextStockList) => {

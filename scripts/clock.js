@@ -2,6 +2,7 @@ exports.worldClock = () => {
   let time = 0;
   const handlers = {
     daily: [],
+    minutely: [],
   };
 
   setInterval(() => {
@@ -10,6 +11,9 @@ exports.worldClock = () => {
       for (const handler of handlers.daily) {
         handler();
       }
+    }
+    for (const handler of handlers.minutely) {
+      handler();
     }
   }, 3000);
 
